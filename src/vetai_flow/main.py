@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from crewai.flow import Flow, listen, start
 from vetai_flow.crews.poem_crew.poem_crew import Vetai2
 from crewai import Agent, Crew, Process, Task
+from vetai_flow.tools.custom_tool import MECalculator,NutritionCalculator
+from vetai_flow.crews.poem_crew.profiles import pet_profile,nutrition_plan
 
 #Setup
 import warnings
@@ -28,6 +30,11 @@ class UserInput(BaseModel):
     
 
 class VetFlow(Flow[UserInput]):
+    #initiate tools
+    def __init__(self):
+        super().__init__()
+        self.me_calculator = MECalculator()
+        self.nutrition_calculator = NutritionCalculator()
 
     @start()
     def get_user_input(self):
@@ -44,7 +51,7 @@ class VetFlow(Flow[UserInput]):
         message = input("Anything else you want to tell me about your pet? ")
 
         # Create UserInput object with both fields
-        user_input = UserInput(
+        self.user_input = UserInput(
             user=user,
             pet_name=pet_name,
             pet_type=pet_type,
@@ -55,42 +62,36 @@ class VetFlow(Flow[UserInput]):
             message=message
         )
 
-        return user_input
+        return self.user_input
 
-    """
     @listen(get_user_input)
-    def analyze_user_input(self):
-        print("Analyzing user input")
-
-        #load tasks and agents
-        agents_config = 'crews/poem_crew/config/agents.yaml'
-        tasks_config = 'crews/poem_crew/config/tasks.yaml'
-
-        task = Task(
-            description=
-                "Parse the user message and extract information about their pet. "
-                "Store all extracted information in a structured format matching these fields: "
-                "- user: The name of the person (if provided) "
-                "- pet_type: Type of pet (dog, cat, etc.) "
-                "- pet_age: Age of the pet in years (as a number) "
-                "- pet_breed: Breed of the pet (e.g., Toy Poodle, Siamese) "
-                "- pet_lifestage: One of [puppy, adult, senior, breeding] "
-                "- pet_weight: Weight of the pet in kg (as a number) "
-                "- exercise_level: One of [minimal, low, moderate, high] "
-                "- message: Any additional health concerns or questions "
-                "\n\n"
-                "Return the information as a JSON object with these exact field names. "
-                "If information is missing, ask the user to provide this information until all fields are filled."
-            ,
-            agent=self.agents_config['assistant']
+    def calculate_metabolism(self, user_input: UserInput):
+        print("calculating metabolism")
+        
+        # Pass only the relevant data to the calculator
+        metabolism = self.me_calculator.run(
+        pet_weight=float(user_input.pet_weight),
+        pet_lifestage=user_input.pet_lifestage,
+        exercise_level=user_input.exercise_level
         )
-        # Implement logic to execute this task, including asking for additional info if needed
-        result = self.execute_task(task)
-        self.state.pet_data = result
-        return result
-    """
 
-    @listen(get_user_input)
+        print(metabolism)
+        return metabolism
+
+    @listen(calculate_metabolism)
+    def calculate_nutrition(self, metabolism):
+        print("calculating nutrition")
+
+        # Use the stored user_input to get pet_lifestage
+        nutrition_plan = self.nutrition_calculator.run(
+            ME=metabolism,
+            pet_lifestage=self.user_input.pet_lifestage
+        )
+
+        print(nutrition_plan)
+        return nutrition_planD
+
+    """@listen(get_user_input)
     def calculate_nutrition(self, user_input: UserInput):
         print("calculating nutrition")
 
@@ -107,7 +108,7 @@ class VetFlow(Flow[UserInput]):
         }
         
         result = Vetai2().crew().kickoff(inputs=input_dict)
-        print(result)
+        print(result)"""
 
 def kickoff():
     vet_flow = VetFlow()
