@@ -1,0 +1,76 @@
+calculate_me:
+  description: >
+    1) Using {pet_lifestage},{pet_weight},{exercise_level}, calculate the metabolizable energy of the pet using the me_calculator tool.
+    2) Create a tailored nutrition plan for the pet using the nutrition_calculator tool. This tool will only use two inputs:
+    the ME value which is result of the me_calculator tool, and {pet_lifestage}.
+    Once completed, return your calculations and nutritional plan （including the entire result） to the quality_assurance for safety check.
+  expected_output: >
+    1)The pet's metabolizable energy (calculated using the me_calculator tool) and a quick explanation of the calculation.
+    2)A concise nutritional plan for the pet, suggesting min_intake value, and unit of each nutrition (based the nutrition_calculator tool).
+    It should take the following format,  make sure it includes the full result provided by the nutrition_calculator tool, do not simplify or remove any information.
+    | Nutrient          | Min Intake | Unit | Notes                          |  
+    |-------------------|------------|------|--------------------------------|  
+    | Crude Protein     | min_intake        | g     | Essential for muscle maintenance |  
+    | Crude Fat         | min_intake        | g    | Energy source and skin health   |  
+    | Linoleic Acid     | min_intake        | g    | Omega-6 fatty acid              |  
+    | ...               | ...       ...  | ...                             |  
+  agent: vet
+    
+safety_check:
+  description: >
+    Use the read_merck tool to check for additional knowledge regarding pet nutrition. Perform a safety check on
+    the nutrition plan. If the nutrition plan is safe, proceed to the respond task. If the nutrition plan is not safe,
+    ask for user input.
+  expected_output: >
+    A short explanation of the safety check, and the nutrition plan.
+  agent: quality_assurance
+
+respond:
+  description: >
+    Take the calculate_me task results from the vet, and draft it into an email nutrition for the {user}.
+    This email should include the full result provided by nutrition_calculator from the calculate_me task, make sure it includes the complete list of tailored nutrition plan. 
+    Respond in the form of a professional email.
+  expected_output: >
+    The final content should include the following secrtions:
+    **Metabolizable Energy (ME) Calculation for Your Pet**  
+    (make sure the results are taken from me_calculations task from vet agent)
+    /n
+    **Tailored Nutritional Plan for Your Pet**:
+    ### 2) Tailored Nutritional Plan (Based on AAFCO/NRC Guidelines):  
+      | Nutrient             | Min Intake  | Unit | Notes                                |  
+      |----------------------|-------------|------|--------------------------------------|  
+      | Crude Protein        | min_intake  | g    | Essential for muscle maintenance     |  
+      | Crude Fat            | min_intake  | g    | Energy source and skin health        |  
+      | Linoleic Acid        | min_intake  | g    | Omega-6 fatty acid                   |  
+      | ALA                  | min_intake  | g    | Not specified for adult pets         |  
+      | EPA + DHA            | min_intake  | g    | Not specified for adult pets         |  
+      | Calcium              | min_intake  | g    | Bone and teeth health                |  
+      | Phosphorus           | min_intake  | g    | Works with calcium for bone health   |  
+      | Potassium            | min_intake  | g    | Electrolyte balance                  |  
+      | Sodium               | min_intake  | g    | Nerve and muscle function            |  
+      | Chloride             | min_intake  | g    | Acid-base balance                    |  
+      | Magnesium            | min_intake  | g    | Enzyme function                      |  
+      | Iron                 | min_intake  | mg   | Oxygen transport                     |  
+      | Copper               | min_intake  | mg   | Red blood cell formation             |  
+      | Manganese            | min_intake  | mg   | Bone and cartilage health            |  
+      | Zinc                 | min_intake  | mg   | Immune function                      |  
+      | Iodine               | min_intake  | mg   | Thyroid hormone production           |  
+      | Selenium             | min_intake  | mg   | Antioxidant defense                  |  
+      | Vitamin A            | min_intake  | IU   | Vision and immune health             |  
+      | Vitamin D            | min_intake  | IU   | Calcium absorption                   |  
+      | Vitamin E            | min_intake  | IU   | Antioxidant                          |  
+      | Thiamine             | min_intake  | mg   | Energy metabolism                    |  
+      | Riboflavin           | min_intake  | mg   | Skin and coat health                 |  
+      | Pantothenic Acid     | min_intake  | mg   | Hormone synthesis                    |  
+      | Niacin               | min_intake  | mg   | Digestive and nervous system support |  
+      | Pyridoxine           | min_intake  | mg   | Protein metabolism                   |  
+      | Folic Acid           | min_intake  | mg   | Cell growth                          |  
+      | Vitamin B12          | min_intake  | mg   | Nerve function                       |  
+      | Choline              | min_intake  | mg   | Liver and brain health               |  
+    （make sure to include every single nutrition result that is provided by the nutrition_calculator from the calculate_me task)
+    /n
+    **Notes**:
+    3) A short paragraph to explain the vet's suggestions, assuming user only has basic pet
+    nutrition knwoledge. The response should include references to everything you used to find the answer,
+    including read_merck tool and external data or solutions. Do not make up any information.
+  agent: assistant
