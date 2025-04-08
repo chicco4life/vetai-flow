@@ -1,6 +1,15 @@
-# {{crew_name}} Crew
+# VetAI Flow Crew
 
-Welcome to the {{crew_name}} Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+Welcome to the VetAI Flow Crew project, powered by [crewAI](https://crewai.com). This project creates a multi-agent AI system designed to assist veterinary professionals with clinical workflows, leveraging the powerful and flexible framework provided by crewAI.
+
+## About VetAI Flow
+
+VetAI Flow uses collaborative AI agents to streamline veterinary workflows, including:
+- Patient data collection
+- Metabolism calculation
+- Nutrition calculation and recommendation
+- Security check
+- Report generation
 
 ## Installation
 
@@ -19,11 +28,11 @@ Next, navigate to your project directory and install the dependencies:
 crewai install
 ```
 
-### Customizing
+### Configuration
 
 **Add your `OPENAI_API_KEY` into the `.env` file**
 
-- Modify `src/vetai_flow/config/agents.yaml` to define your agents
+- Modify `src/vetai_flow/config/agents.yaml` to customize the veterinary specialist agents
 - Modify `src/vetai_flow/config/tasks.yaml` to define your tasks
 - Modify `src/vetai_flow/crew.py` to add your own logic, tools and specific args
 - Modify `src/vetai_flow/main.py` to add custom inputs for your agents and tasks
