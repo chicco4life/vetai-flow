@@ -19,14 +19,14 @@ from pathlib import Path
 
 
 class UserInput(BaseModel):
-    user: str = ""
-    pet_name: str = ""
-    pet_type: str = ""
-    pet_age: int = None
-    pet_lifestage: Literal["puppy", "adult", "senior", "breeding"] = ""
-    pet_weight: float = None
-    exercise_level: Literal["minimal", "low", "moderate", "high"] = ""
-    message: str = "" #"I have a toy poodle, she is 7 years old, and 3.3kg. She has mild mitral valve regurgitation.  She is otherwise healthy. What supplement should she take and how much?"
+    user: str = "Fed"
+    pet_name: str = "Dodo"
+    pet_type: str = "Poodle"
+    pet_age: int = 7
+    pet_lifestage: Literal["puppy", "adult", "senior", "breeding"] = "adult"
+    pet_weight: float = 3.3
+    exercise_level: Literal["minimal", "low", "moderate", "high"] = "low"
+    message: str = "no" #"I have a toy poodle, she is 7 years old, and 3.3kg. She has mild mitral valve regurgitation.  She is otherwise healthy. What supplement should she take and how much?"
     
 
 class VetFlow(Flow[UserInput]):
@@ -41,6 +41,7 @@ class VetFlow(Flow[UserInput]):
         print("Getting user input")
 
         # Collect user input
+        """
         user = input("What is your name? ")
         pet_name = input("What is your pet's name? ")
         pet_type = input("What breed is your pet? ")
@@ -49,8 +50,11 @@ class VetFlow(Flow[UserInput]):
         pet_weight = input("How much does your pet weigh (in kg)? ")
         exercise_level = input("How much does your pet exercise? ")
         message = input("Anything else you want to tell me about your pet? ")
+        """
 
-        # Create UserInput object with both fields
+        # Create UserInput object with both fieldsç
+        self.user_input = UserInput() #this is to directly passs in hard coded values
+        """
         self.user_input = UserInput(
             user=user,
             pet_name=pet_name,
@@ -61,6 +65,7 @@ class VetFlow(Flow[UserInput]):
             exercise_level=exercise_level if exercise_level else None,
             message=message
         )
+        """
 
         return self.user_input
 
@@ -74,6 +79,9 @@ class VetFlow(Flow[UserInput]):
         pet_lifestage=user_input.pet_lifestage,
         exercise_level=user_input.exercise_level
         )
+
+        #store metabolism for later use
+        self.metabolism = metabolism
 
         print(metabolism)
         return metabolism
@@ -89,26 +97,32 @@ class VetFlow(Flow[UserInput]):
         )
 
         print(nutrition_plan)
-        return nutrition_planD
+        return nutrition_plan
 
-    """@listen(get_user_input)
-    def calculate_nutrition(self, user_input: UserInput):
-        print("calculating nutrition")
+    @listen(calculate_nutrition)
+    def create_report(self, nutrition_plan):
+        print("creating final report")
 
         #turn user input from pydantic into a dictionary
         input_dict = {
-            "user": user_input.user,
-            "pet_name": user_input.pet_name,
-            "message": user_input.message,  # Changed from user_input.input to user_input.message
-            "pet_type": user_input.pet_type,
-            "pet_age": user_input.pet_age,
-            "pet_lifestage": user_input.pet_lifestage,
-            "pet_weight": user_input.pet_weight,
-            "exercise_level": user_input.exercise_level
+            "user": self.user_input.user,
+            "pet_name": self.user_input.pet_name,
+            "message": self.user_input.message,  # Changed from user_input.input to user_input.message
+            "pet_type": self.user_input.pet_type,
+            "pet_age": self.user_input.pet_age,
+            "pet_lifestage": self.user_input.pet_lifestage,
+            "pet_weight": self.user_input.pet_weight,
+            "exercise_level": self.user_input.exercise_level,
+
+            #add metabolism and nutrition plan
+            "metabolism": self.metabolism,
+            "nutrition_plan": nutrition_plan
         }
-        
-        result = Vetai2().crew().kickoff(inputs=input_dict)
-        print(result)"""
+        print('input is:',input_dict)
+        # Save the input_dict to the flow state
+    
+        final_result = Vetai2().crew().kickoff(inputs=input_dict)
+        print('final result is:',final_result)
 
 def kickoff():
     vet_flow = VetFlow()

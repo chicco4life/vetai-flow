@@ -1,39 +1,24 @@
-calculate_me:
-  description: >
-    1) Using {pet_lifestage},{pet_weight},{exercise_level}, calculate the metabolizable energy of the pet using the me_calculator tool.
-    2) Create a tailored nutrition plan for the pet using the nutrition_calculator tool. This tool will only use two inputs:
-    the ME value which is result of the me_calculator tool, and {pet_lifestage}.
-    Once completed, return your calculations and nutritional plan （including the entire result） to the quality_assurance for safety check.
-  expected_output: >
-    1)The pet's metabolizable energy (calculated using the me_calculator tool) and a quick explanation of the calculation.
-    2)A concise nutritional plan for the pet, suggesting min_intake value, and unit of each nutrition (based the nutrition_calculator tool).
-    It should take the following format,  make sure it includes the full result provided by the nutrition_calculator tool, do not simplify or remove any information.
-    | Nutrient          | Min Intake | Unit | Notes                          |  
-    |-------------------|------------|------|--------------------------------|  
-    | Crude Protein     | min_intake        | g     | Essential for muscle maintenance |  
-    | Crude Fat         | min_intake        | g    | Energy source and skin health   |  
-    | Linoleic Acid     | min_intake        | g    | Omega-6 fatty acid              |  
-    | ...               | ...       ...  | ...                             |  
-  agent: vet
-    
 safety_check:
   description: >
-    Use the read_merck tool to check for additional knowledge regarding pet nutrition. Perform a safety check on
+    You are provided with a comprehensive report about a specific pet which is in your context.
+    You need to understand this nutrition plan, and perform a safety check on
     the nutrition plan. If the nutrition plan is safe, proceed to the respond task. If the nutrition plan is not safe,
     ask for user input.
   expected_output: >
-    A short explanation of the safety check, and the nutrition plan.
+    1)The full result of metabolism and nutrition calculations that you were provided with.
+    2)A short explanation stating if the nutrition plan has passed the safety check.
   agent: quality_assurance
 
 respond:
   description: >
-    Take the calculate_me task results from the vet, and draft it into an email nutrition for the {user}.
+    Take the results from the vet, and draft it into an email nutrition for the {user}.
     This email should include the full result provided by nutrition_calculator from the calculate_me task, make sure it includes the complete list of tailored nutrition plan. 
     Respond in the form of a professional email.
   expected_output: >
     The final content should include the following secrtions:
     **Metabolizable Energy (ME) Calculation for Your Pet**  
-    (make sure the results are taken from me_calculations task from vet agent)
+    (make sure the results are taken from the safety_check agent)
+
     /n
     **Tailored Nutritional Plan for Your Pet**:
     ### 2) Tailored Nutritional Plan (Based on AAFCO/NRC Guidelines):  
@@ -67,8 +52,9 @@ respond:
       | Folic Acid           | min_intake  | mg   | Cell growth                          |  
       | Vitamin B12          | min_intake  | mg   | Nerve function                       |  
       | Choline              | min_intake  | mg   | Liver and brain health               |  
-    （make sure to include every single nutrition result that is provided by the nutrition_calculator from the calculate_me task)
+    （make sure to include every single nutrition result that is provided by the safety_check)
     /n
+
     **Notes**:
     3) A short paragraph to explain the vet's suggestions, assuming user only has basic pet
     nutrition knwoledge. The response should include references to everything you used to find the answer,
